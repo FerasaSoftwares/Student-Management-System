@@ -1,132 +1,117 @@
-<html>
-    <head>
-        <title>
-            Student Management System
-        </title>
-        <meta name="viewreport" content="width=device-width, initial-scale=1">
-    </head>
-    
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillTrack | Student Skill & Internship Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-
-        #mySidenav a {
-        position: absolute;
-        left: -105px;
-        transition: 0.3s;
-        padding: 15px;
-        width: 100px;
-        text-decoration: none;
-        font-size: 20px;
-        color: white;
-        border-radius: 0 12px 12px 0;
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary));
         }
-
-        #mySidenav a:hover {
-        left: 0;
+        .main-container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 40px;
         }
-
-        #about {
-        top: 20px;
-        background-color: black;
+        .left-banner {
+            flex: 1;
         }
-        #contact {
-        top: 80px;
-        background-color: #555
+        .right-portal {
+            flex: 1;
         }
-        .center{
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: auto;
-            margin-bottom: auto;
+        .role-btn {
+            width: 100%;
+            padding: 14px 20px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: flex-start;
         }
-        .btn {
-                border: 2px solid black;
-                background-color: white;
-                color: black;
-                padding: 14px 28px;
-                font-size: 16px;
-                cursor: pointer;
+        .sidenav-links {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 16px;
+        }
+        .sidenav-links a {
+            background-color: var(--bg-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        @media screen and (max-width: 750px) {
+            .main-container {
+                flex-direction: column;
+                text-align: center;
             }
-            .panel {
-                border-color: crimson;
-                color: crimson;
-            }.panel:hover {
-                background-color: crimson;
-                color: white;
+            .role-btn {
+                justify-content: center;
             }
-        #grad_back 
-        {
-            background-image: linear-gradient(to bottom right , orangered , white , green);
         }
     </style>
+</head>
+<body>
 
-    <body id="grad_back">
-        <div id="mySidenav" class="sidenav">
-            <a href="about_us.php" id="about">About Us</a>
-            <a href="contact_us.php" id="contact">Contact Us</a>
+    <div class="sidenav-links">
+        <a href="about_us.php"><i class="fa-solid fa-circle-info"></i> About Us</a>
+        <a href="contact_us.php"><i class="fa-solid fa-envelope"></i> Contact Us</a>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Illustration/Intro -->
+        <div class="left-banner">
+            <h1 style="font-size: 2.75rem; line-height: 1.2; margin-bottom: 16px;">
+                Welcome to <span style="color: var(--color-primary);">SkillTrack</span>
+            </h1>
+            <p style="font-size: 1.1rem; margin-bottom: 24px;">
+                SkillTrack – Student Skill & Internship Management System is a premium placement portal designed to bridge the gap between classroom skill development and professional corporate internships.
+            </p>
+            <div style="display: flex; gap: 24px; color: var(--text-secondary); font-size: 0.9rem;">
+                <div><i class="fa-solid fa-briefcase" style="color: var(--color-success); margin-right: 6px;"></i> Placements</div>
+                <div><i class="fa-solid fa-award" style="color: var(--color-primary); margin-right: 6px;"></i> Skill Analytics</div>
+                <div><i class="fa-solid fa-code" style="color: var(--color-warning); margin-right: 6px;"></i> Portfolio</div>
+            </div>
         </div>
-        <h1 style="margin-top: 20px; text-align:center ; font-family:Comic Sans MS ; color: white"> 
-            Welcome To Student Management System 
-        </h1>
-        <table class="center">
-            <td>
-                <img src="home_main.png"/>
-            </td>
-            <td>
-                <fieldset style="border-radius:15px ; border-color:white ; border-width:3px ; background-color: #FF7474 ; margin-bottom: 25px">
-                    <legend style="font-family: Comic Sans MS ; color: white">
-                        <fieldset style="border-radius:15px ; border-color:white ; border-width:3px ; background-color: crimson">
-                            Who Are You ?
-                        </fieldset>
-                    </legend>
-                    
-                    <form action="Admin/Admin.php" method="post">
-                        <div style="margin-bottom: 15px ; text-align: center">
-                            <input class="btn panel" type="submit" name="btnAdmin" id="btnAdmin" value="Admin" 
-                            style="
-                            padding-left: 40px;
-                            padding-right: 40px;
-                            padding-top: 7px;
-                            padding-bottom: 7px;
-                            font-size: 17px;
-                            font-family: Comic Sans MS ; 
-                            font-weight: bold ;   
-                            border-radius: 12px ; 
-                            margin-top: 22px">
-                        </div>
-                    </form>
 
-                    <form action="Faculty/Faculty.php" method="post">
-                        <div style="margin-bottom: 15px ; text-align: center">
-                            <input class="btn panel" type="submit" name="btnFaculty" id="btnFaculty" value="Faculty" 
-                            style="
-                            padding-left: 36px;
-                            padding-right: 36px;
-                            padding-top: 7px;
-                            padding-bottom: 7px;
-                            font-size: 17px;
-                            font-family: Comic Sans MS ; 
-                            font-weight: bold ;   
-                            border-radius: 12px ; ">
-                        </div>
-                    </form>
+        <!-- Right Portal Access -->
+        <div class="right-portal">
+            <div class="card" style="margin-bottom: 0; padding: 32px;">
+                <h3 style="margin-bottom: 24px; text-align: center;">Sign In to Portal</h3>
+                
+                <form action="Admin/Admin.php" method="post">
+                    <button class="btn btn-primary role-btn" type="submit" name="btnAdmin">
+                        <i class="fa-solid fa-user-shield" style="font-size: 1.2rem;"></i> Admin / Placement Officer
+                    </button>
+                </form>
 
-                    <form action="Student/Student.php" method="post">
-                        <div style="margin-bottom: 15px ; text-align: center">
-                            <input class="btn panel" type="submit" name="btnStudent" id="btnStudent" value="Student " 
-                            style="
-                            padding-left: 30px;
-                            padding-right: 30px;
-                            padding-top: 7px;
-                            padding-bottom: 7px;
-                            font-size: 17px;
-                            font-family: Comic Sans MS ; 
-                            font-weight: bold ;   
-                            border-radius: 12px ; ">
-                        </div>
-                    </form>
-                </fieldset>
-            </td>
-        </table>
-    </body>
+                <form action="Faculty/Faculty.php" method="post">
+                    <button class="btn btn-secondary role-btn" type="submit" name="btnFaculty">
+                        <i class="fa-solid fa-chalkboard-user" style="font-size: 1.2rem;"></i> Faculty Portal
+                    </button>
+                </form>
+
+                <form action="Student/Student.php" method="post">
+                    <button class="btn btn-success role-btn" type="submit" name="btnStudent">
+                        <i class="fa-solid fa-user-graduate" style="font-size: 1.2rem;"></i> Student Placement Dashboard
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
 </html>
-

@@ -1,19 +1,16 @@
 <?php
 session_start();
-if(isset($_SESSION['isStudentLogin']) == 0){
-    ?>
-        <script type="text/javascript">
-             alert("can't be logout")
-            window.open("http://localhost/sms-main/student/student_panel.php")
-        </script>
-    <?php
-}else{
-    unset($_SESSION['email']);
-    ?>
-    <script type="text/javascript">
-        alert('Logout successfully')
-        window.open("http://localhost/sms-main/student/student_login.php")
-    </script>
-<?php
+$_SESSION = array();
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
 }
+session_destroy();
 ?>
+<script type="text/javascript">
+    alert('Logout successfully');
+    window.open("student_login.php","_self");
+</script>

@@ -1,6 +1,16 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isFacultyLogin'])) {
+    header("Location: faculty_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Faculty Update Panel</title> </head>
+    <head> 
+        <title>Faculty Update Panel</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -145,8 +155,8 @@
                     </legend>
 
                     <?php
-                        error_reporting(0);
-                        include 'C:/xampp/htdocs/sms-main/Admin/Admin_init.php';
+                        error_reporting(E_ALL ^ E_NOTICE);
+                        include 'Faculty_init.php';
                             $emailGet=$_GET[$STUDENT_EMAIL];
                             $query= "SELECT * FROM  $STUDENT_ADD WHERE $STUDENT_EMAIL= '$emailGet' ";
                             $data= mysqli_query($con,$query);
@@ -210,7 +220,7 @@
         </div>
 
         <?php
-            include "C:/xampp/htdocs/sms-main/Admin/Admin_init.php";
+            include "Faculty_init.php";
             
             if(isset($_POST['add_faculty'])){
                 $MNO=$_POST[$STUDENT_MNO];
@@ -227,11 +237,11 @@
                     ?>
                         <script type="text/javascript">
                             alert("Student Updated !");
-                            window.open("http://localhost/sms-main/Faculty/faculty_panel.php","_self");
+                            window.open("faculty_panel.php","_self");
                         </script>
                     <?php
                 }
             }
         ?>
     </body>
-</html> 
+</html>

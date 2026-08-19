@@ -199,47 +199,39 @@
             $EMAIL=$_POST[$ADMIN_EMAIL];
             $PASSWORD=$_POST[$ADMIN_PASSWORD];
             
-
-            $selectQuery="SELECT * FROM $ADMIN WHERE $ADMIN_EMAIL='$EMAIL' AND $ADMIN_PASSWORD='$PASSWORD'";
+            $selectQuery="SELECT * FROM $ADMIN WHERE $ADMIN_EMAIL='$EMAIL'";
             $dbQuery=mysqli_query($con,$selectQuery);
-            $data=mysqli_num_rows($dbQuery);
-
-            if($data){
-                $_SESSION['email'] = $EMAIL;
-                $_SESSION['isAdminLogin'] = 0;
-                ?>
-                    <script type="text/javascript">    
-                        alert('Successfully Login');
-                        window.open("http://localhost/sms-main/Admin/admin_panel.php","_self");
-                    </script>
-
-                <?php
-
-            }else if($selectQuery="SELECT * FROM $ADMIN WHERE $ADMIN_EMAIL='$EMAIL' "){
-                $dbQuery=mysqli_query($con,$selectQuery);
-                $data=mysqli_num_rows($dbQuery);
-                if($data){
-                    
-                        ?>
-                            <script type="text/javascript">
-                                alert('Wrong Password')
-                            </script>
-        
-                        <?php
-                }else{
+            if(mysqli_num_rows($dbQuery) > 0){
+                $row = mysqli_fetch_assoc($dbQuery);
+                if(password_verify($PASSWORD, $row[$ADMIN_PASSWORD])){
+                    $_SESSION['email'] = $EMAIL;
+                    $_SESSION['isAdminLogin'] = 0;
+                    ?>
+                        <script type="text/javascript">    
+                            alert('Successfully Login');
+                            window.open("admin_panel.php","_self");
+                        </script>
+                    <?php
+                } else {
+                    ?>
+                        <script type="text/javascript">
+                            alert('Wrong Password')
+                        </script>
+                    <?php
+                }
+            } else {
                 ?>
                     <script type="text/javascript">
                         alert('Admin not found Pls SignUp !')
                     </script>
                 <?php
             }
-            }
         }
 
         if(isset($_POST['newAccount'])){
             ?>
                 <script type="text/javascript">
-                    window.open("http://localhost/sms-main/Admin/admin_signup.php","_self")
+                    window.open("admin_signup.php","_self")
                 </script>
             <?php
         }
@@ -247,7 +239,7 @@
         if(isset($_POST['go_to_home'])){
             ?>
                 <script type="text/javascript">
-                    window.open("http://localhost/sms-main/main.php","_self")
+                    window.open("../main.php","_self")
                 </script>
             <?php
         }

@@ -1,6 +1,16 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Faculty Update Panel</title> </head>
+    <head> 
+        <title>Faculty Update Panel</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -227,7 +237,8 @@
                 $PASSWORD=$_POST[$FACULTY_PASSWORD];
                 $QUALIFICATION=$_POST[$FACULTY_QUALIFICATION];
 
-                $sql = "UPDATE $FACULTY_ADD SET $FACULTY_MNO=$MNO , $FACULTY_NAME='$NAME' , $FACULTY_PASSWORD='$PASSWORD' , $FACULTY_QUALIFICATION='$QUALIFICATION' WHERE $FACULTY_EMAIL = '$emailGet' ";
+                $hashed_password = password_hash($PASSWORD, PASSWORD_DEFAULT);
+                $sql = "UPDATE $FACULTY_ADD SET $FACULTY_MNO=$MNO , $FACULTY_NAME='$NAME' , $FACULTY_PASSWORD='$hashed_password' , $FACULTY_QUALIFICATION='$QUALIFICATION' WHERE $FACULTY_EMAIL = '$emailGet' ";
 
                 $dbquery = mysqli_query($con,$sql);
                 if(!$dbquery){
@@ -236,7 +247,7 @@
                     ?>
                         <script type="text/javascript">
                             alert("Faculty Updated !");
-                            window.open("http://localhost/sms-main/Admin/admin_panel.php","_self");
+                            window.open("admin_panel.php","_self");
                         </script>
                     <?php
                 }

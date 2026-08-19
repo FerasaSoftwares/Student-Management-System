@@ -176,23 +176,30 @@
             $EMAIL=$_POST[$FACULTY_EMAIL];
             $PASSWORD=$_POST[$FACULTY_PASSWORD];
             
-            $selectQuery="SELECT * FROM $FACULTY_ADD WHERE $FACULTY_EMAIL='$EMAIL' AND $FACULTY_PASSWORD='$PASSWORD' ";
+            $selectQuery="SELECT * FROM $FACULTY_ADD WHERE $FACULTY_EMAIL='$EMAIL'";
             $dbQuery=mysqli_query($con,$selectQuery);
-            $data=mysqli_num_rows($dbQuery);
-
-            if($data){
-                $_SESSION['email'] = $EMAIL;
-                $_SESSION['isFacultyLogin'] = 0;
-                ?>
-                <script type="text/javascript">
-                    alert("Sucessfully Login")
-                    window.open("http://localhost/sms-main/Faculty/Faculty_panel.php","_self")
-                </script>
-            <?php
+            if(mysqli_num_rows($dbQuery) > 0){
+                $row = mysqli_fetch_assoc($dbQuery);
+                if(password_verify($PASSWORD, $row[$FACULTY_PASSWORD])){
+                    $_SESSION['email'] = $EMAIL;
+                    $_SESSION['isFacultyLogin'] = 0;
+                    ?>
+                    <script type="text/javascript">
+                        alert("Successfully Login")
+                        window.open("faculty_panel.php","_self")
+                    </script>
+                    <?php
+                } else {
+                    ?>
+                    <script type="text/javascript">
+                        alert("Wrong Password! Try again.")
+                    </script>
+                    <?php
+                }
             }else{
                 ?>
                     <script type="text/javascript">
-                        alert("Something went wrong ! try Again ...")
+                        alert("Faculty account not found! Contact Admin.")
                     </script>
                 <?php
             }
@@ -201,7 +208,7 @@
         if(isset($_POST['go_to_home'])){
             ?>
                 <script type="text/javascript">
-                    window.open("http://localhost/sms-main/main.php","_self")
+                    window.open("../main.php","_self")
                 </script>
             <?php
         }

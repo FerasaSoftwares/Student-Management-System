@@ -234,27 +234,28 @@
                         ?>
                         <script type="text/javascript">
                             alert("Admin account already exist")
-                            window.open("http://localhost/sms-main/Admin/admin_login.php","_self")
+                            window.open("admin_login.php","_self")
                         </script>
                     <?php
                     }else{
-                        $insertInTable= "INSERT INTO $ADMIN VALUES('$NAME','$CONTACT','$EMAIL','$PASSWORD')";
+                        $hashed_password = password_hash($PASSWORD, PASSWORD_DEFAULT);
+                        $insertInTable= "INSERT INTO $ADMIN VALUES('$NAME','$CONTACT','$EMAIL','$hashed_password')";
                         $queryExe=mysqli_query($con,$insertInTable);
                         if($queryExe){
                         ?>
                             <script type="text/javascript">
                                 alert("Successfully Register !")
-                                window.open("http://localhost/sms-main/Admin/admin_login.php","_self")
+                                window.open("admin_login.php","_self")
                             </script>
                         <?php
+                        }
                     }
                 }
-            }
 
             if(isset($_POST['already_acc'])){
                 ?>
                     <script>
-                        window.open("http://localhost/sms-main/Admin/admin_login.php","_self")
+                        window.open("admin_login.php","_self")
                     </script>
                 <?php
             }

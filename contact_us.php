@@ -1,178 +1,77 @@
-<html>
-    <head>
-        <title>
-            Contact Us
-        </title>
-    </head>
-    <style>
-        .btn {
-        border: 2px solid #ccc;
-        border-radius:4px;
-        background-color: white;
-        color: black;
-        margin-left:12px;
-        padding:12px;
-        font-family:Times New Roman;
-        font-size:18px;
-        cursor: pointer;
-        }
-        .panel
-        {
-            border-color: black;
-            color: black;
-        }
-        .panel:hover 
-        {
-            background-color: black;
-            color: white;
-        }
-        textarea 
-        {
-        margin-left:12px;
-        margin-bottom:12px;
-        width: 100%;
-        height: 150px;
-        padding: 12px 18px;
-        box-sizing: border-box;
-        border: 2px solid #ccc;
-        border-radius: 4px;
-        background-color: #f8f8f8;
-        font-size: 16px;
-        resize: none;
-        }
-        .text_des
-        {
-            border:2px solid #ccc;
-            border-radius:4px;
-            padding-left:8px;
-            padding-top:8px;
-            padding-bottom:8px;
-            padding-right:52px;
-            margin-left:12px;
-            margin-right:12px;
-            margin-top:4px;
-            margin-bottom:18px;
-        }
-        .text_des_ddi
-        {
-            border:2px solid #ccc;
-            border-radius:4px;
-            padding-right:68px;
-            padding-left:8px;
-            padding-top:8px;
-            padding-bottom:8px;
-            margin-left:12px;
-            margin-right:12px;
-            margin-top:4px;
-            margin-bottom:12px;
-        }
-        
-        .text_des_ddb
-        {
-            border:2px solid #ccc;
-            border-radius:4px;
-            padding-right:120px;
-            padding-left:8px;
-            padding-top:8px;
-            padding-bottom:8px;
-            margin-left:12px;
-            margin-right:12px;
-            margin-top:4px;
-            margin-bottom:12px;
-        }
-    </style>
-    <body>
-    <center>
-            <table>
-                <form action="" method="post">
-                    <div>
-                        <h1>Love to hear from you , </br> Get in touch👋</h1>
-                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | SkillTrack</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
-                    <tr>
-                        <td>
-                            <label style="margin-left:12px ; font-weight:bold">
-                                Your name
-                            </label>
-                        </td>
-                        <td>
-                            <label style="margin-left:12px ; font-weight:bold">
-                                Your email
-                            </label>
-                        </td>     
-                    </tr>
-                    <tr>
-                        <td>
-                            <input id="name" type="text" class=text_des placeholder="Enter Your Name" required/>
-                        </td>
-                        <td>
-                            <input id="email" type="text" class=text_des placeholder="you@example.com" required/>
-                        </td>
-                    </tr>
+<div class="container" style="max-width: 600px; margin-top: 40px;">
+    <!-- Back to home -->
+    <a href="main.php" class="btn btn-secondary" style="margin-bottom: 24px;"><i class="fa-solid fa-arrow-left"></i> Back to Portal</a>
 
-                    <tr>
-                        <td>
-                            <label style="margin-left:12px ; font-weight:bold">
-                                What you are interested
-                            </label>
-                        </td>
-                        <td>
-                            <label style="margin-left:12px ; font-weight:bold">
-                                Project Budget
-                            </label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <select class=text_des_ddi>
-                                <option>Website Development</option>
-                                <option>Website Design</option>
-                                <option>App Development</option>
-                                <option>App Design</option>
-                                <option>Java Source Codes</option>
-                                <option>Python Source Codes</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class=text_des_ddb>
-                                <option>5000-10000</option>
-                                <option>10000-15000</option>
-                                <option>15000-20000</option>
-                                <option>20000-25000</option>
-                                <option>25000-30000</option>
-                            </select>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <label style="margin-left:12px ; font-weight:bold">
-                                Message 
-                            </label>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <textarea id="cdetail" placeholder="Let tell us know your project about" required></textarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input id="btngo" name="btngo" type="button" value="Just Send" class="btn panel"/>
-                        </td>
-                    </tr>
-                </form>
-            </table>
-        </center>
-    </body>
     <?php
-        if(isset($_POST['btngo'])){
-        ?>
-            <script type="text/javascript">
-                alert('Thanks For Contacting Us ❤️');
-            </script>
-        <?php
-        }
+    $success = false;
+    if (isset($_POST['btngo'])) {
+        $success = true;
+    }
     ?>
+
+    <?php if ($success): ?>
+        <div class="card badge-success" style="padding: 16px; font-weight: 500; margin-bottom: 24px; text-align: center;">
+            <i class="fa-solid fa-heart" style="margin-right: 8px;"></i>
+            Thanks for reaching out! We'll get back to you shortly. ❤️
+        </div>
+    <?php endif; ?>
+
+    <div class="card">
+        <h2 style="text-align: center; margin-bottom: 8px;">Get in Touch 👋</h2>
+        <p style="text-align: center; margin-bottom: 24px;">Have questions about SkillTrack? Drop us a line!</p>
+
+        <form action="contact_us.php" method="POST">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-control" name="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Email</label>
+                    <input type="email" class="form-control" name="email" placeholder="john@example.com" required>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Interested In</label>
+                    <select class="form-control" name="interest">
+                        <option>General Inquiry</option>
+                        <option>Placements Feedback</option>
+                        <option>Corporate Partnership</option>
+                        <option>Report a Bug</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Urgency</label>
+                    <select class="form-control" name="urgency">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Message Details</label>
+                <textarea class="form-control" name="message" placeholder="How can we help you today?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="btngo" style="width: 100%;"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+        </form>
+    </div>
+</div>
+
+</body>
 </html>

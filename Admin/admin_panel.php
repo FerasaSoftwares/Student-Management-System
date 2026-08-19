@@ -1,382 +1,381 @@
-<html>
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
 
+include "Admin_init.php";
+$email = $_SESSION['email'];
+
+// Handle CSV Export
+if (isset($_GET['export_csv'])) {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=placement_report_' . date('Ymd') . '.csv');
+    $output = fopen('php://output', 'w');
+    
+    // Output column headers
+    fputcsv($output, ['Name', 'Email', 'Phone', 'Department', 'Year', 'Result/CGPA', 'Placement Status', 'Placed Company', 'Role']);
+    
+    $query = "SELECT s.student_name, s.student_email, s.student_result, sp.department, sp.year, sp.phone,
+                       ia.application_status, io.company, io.position
+                FROM `$STUDENT_ADD` s
+                LEFT JOIN `student_profiles` sp ON s.student_email = sp.student_email
+                LEFT JOIN `internship_applications` ia ON s.student_email = ia.student_email AND ia.application_status = 'Selected'
+                LEFT JOIN `internship_opportunities` io ON ia.internship_id = io.id
+                GROUP BY s.student_email
+                ORDER BY s.student_name ASC";
+                
+    $res = mysqli_query($con, $query);
+    while ($row = mysqli_fetch_assoc($res)) {
+        $status = $row['company'] ? 'Placed' : 'Not Placed';
+        fputcsv($output, [
+            $row['student_name'],
+            $row['student_email'],
+            $row['phone'] ?: '',
+            $row['department'] ?: '',
+            $row['year'] ?: '',
+            $row['student_result'],
+            $status,
+            $row['company'] ?: '',
+            $row['position'] ?: ''
+        ]);
+    }
+    fclose($output);
+    exit();
+}
+
+// 1. Fetch Stats
+// Total Students
+$q_students = mysqli_query($con, "SELECT COUNT(*) as count FROM `$STUDENT_ADD`");
+$r_students = mysqli_fetch_assoc($q_students);
+$total_students = $r_students['count'];
+
+// Total Internships
+$q_internships = mysqli_query($con, "SELECT COUNT(*) as count FROM `internship_opportunities`");
+$r_internships = mysqli_fetch_assoc($q_internships);
+$total_internships = $r_internships['count'];
+
+// Total Applications
+$q_apps = mysqli_query($con, "SELECT COUNT(*) as count FROM `internship_applications`");
+$r_apps = mysqli_fetch_assoc($q_apps);
+$total_applications = $r_apps['count'];
+
+// Placed/Selected Students
+$q_placed = mysqli_query($con, "SELECT COUNT(DISTINCT student_email) as count FROM `internship_applications` WHERE `application_status` = 'Selected'");
+$r_placed = mysqli_fetch_assoc($q_placed);
+$placed_students = $r_placed['count'];
+
+// Students without internships
+$unplaced_students = max(0, $total_students - $placed_students);
+
+// 2. Fetch Chart Data
+// App status distribution
+$status_data = ['Pending' => 0, 'Under Review' => 0, 'Interview Scheduled' => 0, 'Selected' => 0, 'Rejected' => 0];
+$q_status_dist = mysqli_query($con, "SELECT `application_status`, COUNT(*) as count FROM `internship_applications` GROUP BY `application_status`");
+while ($row = mysqli_fetch_assoc($q_status_dist)) {
+    if (isset($status_data[$row['application_status']])) {
+        $status_data[$row['application_status']] = (int)$row['count'];
+    }
+}
+
+// Top skill categories in system
+$category_data = [];
+$q_cat_dist = mysqli_query($con, "SELECT `category`, COUNT(*) as count FROM `student_skills` GROUP BY `category` ORDER BY count DESC LIMIT 5");
+while ($row = mysqli_fetch_assoc($q_cat_dist)) {
+    $category_data[$row['category']] = (int)$row['count'];
+}
+
+?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Admin Panel </title>
-</head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-    body {
-        font-family: "Comic Sans MS";
-    }
-
-    img {
-        margin-top: 25px;
-        border-radius: 50%;
-    }
-
-    .text_des {
-        border: 2px solid #ccc;
-        border-radius: 4px;
-        padding-left: 8px;
-        padding-top: 9px;
-        padding-bottom: 9px;
-        padding-right: 52px;
-        margin-left: 12px;
-        margin-top: 4px;
-        margin-bottom: 18px;
-    }
-
-    .card {
-        color: black;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px 0 black;
-        max-width: 300px;
-        margin-top: 30px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: auto;
-        text-align: center;
-        font-family: arial;
-    }
-
-    a {
-        text-decoration: none;
-        font-size: 22px;
-        color: black;
-    }
-
-    button:hover,
-    a:hover {
-        opacity: 0.7;
-    }
-
-    .box_left {
-        margin: 8px;
-        color: white;
-        background-color: #F96167;
-        height: 471.1px;
-        width: 360px;
-        border: 4px solid #F96167;
-        border-radius: 25px;
-    }
-
-    .box_right {
-        color: white;
-        padding-left: 8px;
-        padding-right: 8px;
-        background-color: orange;
-        height: 471.1px;
-        width: 890px;
-        border: 4px solid orange;
-        border-radius: 25px 0px 0px 25px;
-    }
-
-    #grad_back {
-        background: linear-gradient(to right, #EEA47F, white, #00539C);
-    }
-
-    .navbar {
-        width: 1086px;
-        margin: auto;
-        background-color: #E9967A;
-        overflow: auto;
-    }
-
-    .navbar a {
-        float: left;
-        padding: 12px;
-        color: white;
-        text-decoration: none;
-        font-size: 17px;
-    }
-
-    .navbar a:hover {
-        background-color: #FF5733;
-    }
-
-    .active {
-        background-color: #FF5733;
-    }
-
-    @media screen and (max-width: 500px) {
-        .navbar a {
-            float: none;
-            display: block;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SkillTrack</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
         }
-    }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 320px;
+        }
+        @media screen and (max-width: 1000px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media screen and (max-width: 700px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
 
-    .button {
-        font-family: "Comic Sans MS";
-        border: 2px solid black;
-        border-radius: 12px;
-        background-color: white;
-        color: black;
-        padding: 7px 14px;
-        font-size: 16px;
-        cursor: pointer;
-    }
+<div class="container">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="navbar-brand">
+            <i class="fa-solid fa-graduation-cap text-indigo-500"></i>
+            <span>SkillTrack Admin</span>
+        </div>
+        <nav class="navbar-nav">
+            <a href="admin_panel.php" class="active"><i class="fa-solid fa-chart-pie"></i> Placement Dashboard</a>
+            <a href="student_panel.php"><i class="fa-solid fa-user-graduate"></i> Students</a>
+            <a href="faculty_panel.php"><i class="fa-solid fa-chalkboard-user"></i> Faculty</a>
+            <a href="notice_panel.php"><i class="fa-solid fa-envelope-open-text"></i> Notices</a>
+            <a href="admin_logout.php" class="btn btn-danger" style="color: white; padding: 6px 12px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+    </header>
 
-    .des {
-        border-color: orange;
-        color: orange;
-    }
-
-    .des:hover {
-        background-color: black;
-        color: white;
-    }
-</style>
-
-<body id="grad_back">
-    <div class="navbar" style="border-radius:25px ; border-color:#FF5733 ; border-style:solid ; border-width:2px">
-
-        <a style="background-color:#E9967A">
-            <h7 style="margin-left: 20px;">Student Management System</h7>
-        </a>
-
-        <a style="margin-left: 57.5px" class="active" href="admin_panel.php">
-            <i class="fa fa-fw fa-home"></i>
-            Admin Panel
-        </a>
-
-        <a href="notice_panel.php">
-            <i class="fa fa-fw fa-bell"></i>
-            Notice
-        </a>
-
-        <a href="faculty_panel.php">
-            <i class="fa fa-fw fa-graduation-cap"></i>
-            Faculty
-        </a>
-
-        <a href="faculty_update.php">
-            <i class="fa fa-fw fa-wrench"></i>
-            Faculty Update
-        </a>
-
-        <a href="student_panel.php">
-            <i class="fa fa-fw fa-user"></i>
-            Student
-        </a>
-
-        <a href="admin_logout.php">
-            <i class="fa fa-fw fa-power-off"></i>
-            Logout
-        </a>
-
-
+    <!-- Placement Statistics Cards -->
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div>
+                <div class="stat-value"><?php echo $total_students; ?></div>
+                <div class="stat-label">Total Students</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(99,102,241,0.15); color: var(--color-primary);"><i class="fa-solid fa-briefcase"></i></div>
+            <div>
+                <div class="stat-value"><?php echo $total_internships; ?></div>
+                <div class="stat-label">Active Internships</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(245,158,11,0.15); color: var(--color-warning);"><i class="fa-solid fa-paper-plane"></i></div>
+            <div>
+                <div class="stat-value"><?php echo $total_applications; ?></div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(16,185,129,0.15); color: var(--color-success);"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+                <div class="stat-value"><?php echo $placed_students; ?></div>
+                <div class="stat-label">Placed Students</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(239,68,68,0.15); color: var(--color-danger);"><i class="fa-solid fa-user-xmark"></i></div>
+            <div>
+                <div class="stat-value"><?php echo $unplaced_students; ?></div>
+                <div class="stat-label">Unplaced Students</div>
+            </div>
+        </div>
     </div>
 
-    <div style="margin-top: 16px">
-        <center>
-            <table>
-                <td>
-                    <div class="box_left">
-                        <div class="card">
-                            <img src="images_admin/rajat.jpg" width=140px />
-                            <div style="text-align:center ; font-family:Comic Sans MS ">
-                                <?php
-                                include "Admin_init.php";
-                                $sql = "SELECT * FROM $ADMIN";
-                                $queryExe = mysqli_query($con, $sql);
-                                $dbquery = mysqli_query($con, $sql);
-                                $data = mysqli_num_rows($dbquery);
-                                if ($dbquery) {
-                                    while ($rows = mysqli_fetch_array($queryExe)) {
-                                        echo "Welcome , $rows[$ADMIN_NAME]" . "</br>";
-                                        echo "You Are Current Admin Now!" . "</br>";
-                                    }
-                                }
-                                ?>
-                            </div>
-                            <p style="font-family:Comic Sans MS">Sutex Bank College Of Computer Applications & Science
-                            </p>
-                            <div>
-                                <a href="https://www.instagram.com/rajatt.dev/"
-                                    style="color:#F96167 ; margin-right:10px"><i class="fa fa-instagram"></i></a>
-                                <a href="https://wa.me/9327998218?text=Hi" style="color:#F96167 ; margin-right:10px"><i
-                                        class="fa fa-whatsapp"></i></a>
-                                <a href="https://www.linkedin.com/in/rajat-kevat-97340a252/"
-                                    style="color:#F96167 ; margin-right:10px"><i class="fa fa-linkedin"></i></a>
-                                <a href="https://www.facebook.com/rajat.kevat.7"
-                                    style="color:#F96167 ; margin-right:10px"><i class="fa fa-facebook"></i></a>
-                                <p style="font-family:Comic Sans MS"> You Can Operate </br> Faculty From Here ~</p>
-                                </br>
-                            </div>
-                        </div>
-                    </div>
-                </td>
+    <!-- Quick Export Card -->
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+            <h3>Placement & Skill Analytics</h3>
+            <p style="margin-bottom:0;">Generate and download real-time CSV reports of placements, skills, and student lists.</p>
+        </div>
+        <a href="admin_panel.php?export_csv=1" class="btn btn-success"><i class="fa-solid fa-file-csv"></i> Export Placement Report (CSV)</a>
+    </div>
 
-                <td>
-                    <div class="box_right" style="overflow-y:scroll ; overflow-x:hidden ">
-                        <h2 style="text-align:center">
-                            <i class="fa fa-fw fa-search" style="margin-right:4px"></i>Search Faculty Data ~
-                            <form style="margin-top:8px" action="" method="post">
-                                <input class="text_des" type="text" placeholder="Search..." id="search_faculty_box"
-                                    name="search_faculty_box" />
-                                <input class="button des" type="submit" id="btnSearch" name="btnSearch"
-                                    value="Search" />
-                            </form>
-                        </h2>
-                        <center>
-                            <table border="6px" cellspacing="0px" cellpadding="10px"
-                                style="text-align:center; margin:8px; background-color: transparent; border-radius: 8px; border-color: thistle;">
-                                <tr>
-                                    <th style="font-family: Comic Sans MS;
-                                font-size: 14px; font-weight: bold;">
-                                        NAME
-                                    </th>
-                                    <th colspan="0px" style="font-family: Comic Sans MS;
-                                font-size: 14px; font-weight: bold;">
-                                        MOBILE NO
-                                    </th>
-                                    <th style="font-family: Comic Sans MS;
-                                font-size: 14px; font-weight: bold;">
-                                        EMAIL
-                                    </th>
-                                    <th style="font-family: Comic Sans Ms;
-                                font-size: 14px; font-weight: bold;">
-                                        QUALIFICATION
-                                    </th>
-                                    <th colspan="0px" style="font-family: Comic Sans MS;
-                                font-size: 14px; font-weight: bold;">
-                                        PASSWORD
-                                    </th>
-                                    <th colspan="2" style="font-family: Comic Sans MS;
-                                font-size: 14px; font-weight: bold;">
-                                        ACTION
-                                    </th>
-                                </tr>
+    <!-- Chart Analytics Grid -->
+    <div class="chart-grid">
+        <div class="chart-container">
+            <h4 style="text-align: center; margin-bottom: 15px;">Application Status Distribution</h4>
+            <canvas id="statusChart" style="max-height: 250px;"></canvas>
+        </div>
+        <div class="chart-container">
+            <h4 style="text-align: center; margin-bottom: 15px;">Top Skill Categories</h4>
+            <canvas id="skillsChart" style="max-height: 250px;"></canvas>
+        </div>
+    </div>
 
+    <!-- Skill Filter Directory -->
+    <div class="card">
+        <h3>Placement Skill Filter Directory</h3>
+        <p>Directly search students by their skillsets. Use format: <code>PHP + MySQL + JavaScript</code> to query students possessing all specified skills.</p>
+        <form action="admin_panel.php" method="POST" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0; flex-grow: 1;">
+                <input type="text" class="form-control" name="search_query" placeholder="e.g. PHP + MySQL" value="<?php echo isset($_POST['search_query']) ? htmlspecialchars($_POST['search_query']) : ''; ?>">
+            </div>
+            <button type="submit" class="btn btn-primary" name="btnSearch"><i class="fa-solid fa-magnifying-glass"></i> Filter Talent</button>
+            <a href="admin_panel.php" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Clear</a>
+        </form>
 
-
-                                <?php
-                                if (isset($_POST['btnSearch'])) {
-                                   
-                                    $val = $_POST['search_faculty_box'];
-                               
-                                    $sql = "SELECT * FROM $FACULTY_ADD WHERE $FACULTY_NAME LIKE '%${val}%' OR $FACULTY_MNO LIKE '%${val}%' OR $FACULTY_EMAIL LIKE '%${val}%' OR $FACULTY_QUALIFICATION LIKE '%${val}%' OR $FACULTY_PASSWORD LIKE '%${val}%'";
-                            
-                                $queryExe = mysqli_query($con, $sql);
-                                $data = mysqli_num_rows($queryExe);
-                                if ($data) {
-                                    while ($row = mysqli_fetch_array($queryExe)) {
-                                        ?>
-                                        <tr style="font-family: Comic Sans MS;
-                                        font-size: 14px; font-weight: bold;">
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_NAME];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_MNO];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_EMAIL];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_QUALIFICATION];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_PASSWORD];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <a href="faculty_delete.php?faculty_email=<?php echo $row['faculty_email'] ?> "><button
-                                                        class="button des">DELETE</button></a>
-                                            </td>
-                                            <td>
-                                                <a href="faculty_update.php?faculty_email=<?php echo $row['faculty_email'] ?> "><button
-                                                        class="button des">UPDATE</button></a>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    }
-                                }else{
-                                    echo "<center>
-                                            <h1> No Records Found ! </br> 
-                                            </h1>
-                                        </center>";
-                                }
-                            }else{
-
-                                include "Admin_init.php";
-                                mysqli_query(
-                                    $con,
-                                    "CREATE TABLE IF NOT EXISTS $FACULTY_ADD($FACULTY_MNO BIGINT UNIQUE,
-                            $FACULTY_NAME TEXT,$FACULTY_EMAIL VARCHAR(256) PRIMARY KEY,$FACULTY_PASSWORD TEXT,$FACULTY_QUALIFICATION TEXT)"
-                                );
-                                $sql = "SELECT * FROM $FACULTY_ADD";
-                                $queryExe = mysqli_query($con, $sql);
-                                $data = mysqli_num_rows($queryExe);
-                                if ($data) {
-                                    while ($row = mysqli_fetch_array($queryExe)) {
-                                        ?>
-                                        <tr style="font-family: Comic Sans MS;
-                                        font-size: 14px; font-weight: bold;">
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_NAME];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_MNO];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_EMAIL];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_QUALIFICATION];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                echo $row[$FACULTY_PASSWORD];
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <a href="faculty_delete.php?faculty_email=<?php echo $row['faculty_email'] ?> "><button
-                                                        class="button des">DELETE</button></a>
-                                            </td>
-                                            <td>
-                                                <a href="faculty_update.php?faculty_email=<?php echo $row['faculty_email'] ?> "><button
-                                                        class="button des">UPDATE</button></a>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    }
-                                } else {
-                                    echo "<center>
-                                            <h1> No Records ! </br> 
-                                                Please Add Some Records 
-                                            </h1>
-                                        </center>";
-                                }
-                                
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email ID</th>
+                        <th>Department</th>
+                        <th>CGPA</th>
+                        <th>Skills</th>
+                        <th>Placement Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $search_query = "";
+                    $sql = "";
+                    
+                    if (isset($_POST['btnSearch']) && !empty($_POST['search_query'])) {
+                        $search_query = $_POST['search_query'];
+                        $skills_input = preg_split('/[\+,]/', $search_query);
+                        $skills = [];
+                        foreach ($skills_input as $s) {
+                            $s_trimmed = trim($s);
+                            if ($s_trimmed != "") {
+                                $skills[] = mysqli_real_escape_string($con, $s_trimmed);
                             }
-                                ?>
-                            </table>
-                        </center>
-                    </div>
-                </td>
+                        }
+                        
+                        if (count($skills) > 0) {
+                            $skill_list = "'" . implode("','", $skills) . "'";
+                            $num_skills = count($skills);
+                            $sql = "SELECT s.*, sp.department, sp.year 
+                                    FROM `$STUDENT_ADD` s
+                                    LEFT JOIN `student_profiles` sp ON s.student_email = sp.student_email
+                                    JOIN `student_skills` sk ON s.student_email = sk.student_email
+                                    WHERE LOWER(sk.skill_name) IN (LOWER($skill_list))
+                                    GROUP BY s.student_email
+                                    HAVING COUNT(DISTINCT LOWER(sk.skill_name)) = $num_skills";
+                        }
+                    }
+                    
+                    if ($sql == "") {
+                        $sql = "SELECT s.*, sp.department, sp.year 
+                                FROM `$STUDENT_ADD` s
+                                LEFT JOIN `student_profiles` sp ON s.student_email = sp.student_email
+                                ORDER BY s.student_name ASC";
+                    }
+                    
+                    $res = mysqli_query($con, $sql);
+                    if (mysqli_num_rows($res) == 0) {
+                        echo "<tr><td colspan='6' style='text-align:center;'>No matching students found.</td></tr>";
+                    } else {
+                        while ($st = mysqli_fetch_assoc($res)) {
+                            $st_email = $st['student_email'];
+                            
+                            // Fetch placement
+                            $place_chk = mysqli_query($con, "SELECT io.company, io.position 
+                                                             FROM `internship_applications` ia
+                                                             JOIN `internship_opportunities` io ON ia.internship_id = io.id
+                                                             WHERE ia.student_email = '$st_email' AND ia.application_status = 'Selected' LIMIT 1");
+                            $placed = mysqli_fetch_assoc($place_chk);
+                            $place_status = $placed ? "<span class='badge badge-success'>Placed @ " . htmlspecialchars($placed['company']) . "</span>" : "<span class='badge badge-danger'>Not Placed</span>";
+                            
+                            // Fetch all skills
+                            $skills_q = mysqli_query($con, "SELECT `skill_name` FROM `student_skills` WHERE `student_email` = '$st_email'");
+                            $st_skills = [];
+                            while ($sk = mysqli_fetch_assoc($skills_q)) {
+                                $st_skills[] = htmlspecialchars($sk['skill_name']);
+                            }
+                            
+                            echo "<tr>";
+                            echo "<td><strong>" . htmlspecialchars($st['student_name']) . "</strong></td>";
+                            echo "<td>" . htmlspecialchars($st['student_email']) . "</td>";
+                            echo "<td>" . htmlspecialchars($st['department'] ?: 'N/A') . "</td>";
+                            echo "<td>" . htmlspecialchars($st['student_result']) . "</td>";
+                            echo "<td>" . (empty($st_skills) ? '<span style="color:var(--text-secondary);">None</span>' : implode(', ', $st_skills)) . "</td>";
+                            echo "<td>" . $place_status . "</td>";
+                            echo "</tr>";
+                        }
+                    }
+                    ?>
+                </tbody>
             </table>
-        </center>
+        </div>
     </div>
-</body>
+</div>
 
+<!-- Chart Script Rendering -->
+<script>
+    // Application Status Chart
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Under Review', 'Interview Scheduled', 'Selected', 'Rejected'],
+            datasets: [{
+                data: [
+                    <?php echo $status_data['Pending']; ?>,
+                    <?php echo $status_data['Under Review']; ?>,
+                    <?php echo $status_data['Interview Scheduled']; ?>,
+                    <?php echo $status_data['Selected']; ?>,
+                    <?php echo $status_data['Rejected']; ?>
+                ],
+                backgroundColor: [
+                    '#f59e0b', // Amber
+                    '#3b82f6', // Blue
+                    '#6366f1', // Indigo
+                    '#10b981', // Emerald
+                    '#ef4444'  // Rose
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#cbd5e1' }
+                }
+            }
+        }
+    });
+
+    // Top Skill Categories Chart
+    const ctxSkills = document.getElementById('skillsChart').getContext('2d');
+    new Chart(ctxSkills, {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode(array_keys($category_data)); ?>,
+            datasets: [{
+                label: 'Added Skills Count',
+                data: <?php echo json_encode(array_values($category_data)); ?>,
+                backgroundColor: '#6366f1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#cbd5e1', stepSize: 1 },
+                    grid: { color: '#334155' }
+                },
+                x: {
+                    ticks: { color: '#cbd5e1' },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+</body>
 </html>

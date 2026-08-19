@@ -1,6 +1,16 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Student Panel</title> </head>
+    <head> 
+        <title>Faculty Panel</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -230,24 +240,25 @@
                     ?>
                         <script>
                             alert("This Faculty Added Already !");
-                            window.open("http://localhost/sms-main/Admin/faculty_panel.php","_self");
+                            window.open("faculty_panel.php","_self");
                         </script>
                     <?php
                 } else {
-                    $insertInTable = "INSERT INTO $FACULTY_ADD VALUES($MNO,'$NAME','$EMAIL','$PASSWORD','$QUALIFICATION')";
+                    $hashed_password = password_hash($PASSWORD, PASSWORD_DEFAULT);
+                    $insertInTable = "INSERT INTO $FACULTY_ADD VALUES($MNO,'$NAME','$EMAIL','$hashed_password','$QUALIFICATION')";
                     $queryExe = mysqli_query($con,$insertInTable);
                     if($queryExe){
                         ?>
                             <script>
                                 alert("Faculty Added Successfully !");
-                                window.open("http://localhost/sms-main/Admin/faculty_panel.php","_self");
+                                window.open("faculty_panel.php","_self");
                             </script>
                         <?php
                     }else{
                         ?>
                             <script>
                                 alert("Something Went Wrong !");
-                                window.open("http://localhost/sms-main/Admin/student_panel.php","_self");
+                                window.open("faculty_panel.php","_self");
                             </script>
                         <?php
                     } 

@@ -1,6 +1,16 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Notice Panel</title> </head>
+    <head> 
+        <title>Notice Panel</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -254,7 +264,7 @@
                     ?>
                         <script>
                             alert("This Notice Added Already For Faculty !");
-                            window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                            window.open("notice_panel.php","_self");
                         </script>
                     <?php
                 } else {
@@ -264,14 +274,14 @@
                         ?>
                             <script>
                                 alert("Notice Added Successfully For Faculty !");
-                                window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                                window.open("notice_panel.php","_self");
                             </script>
                         <?php
                     }else{
                         ?>
                             <script>
                                 alert("Something Went Wrong !");
-                                window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                                window.open("notice_panel.php","_self");
                             </script>
                         <?php
                     }
@@ -294,7 +304,7 @@
                     ?>
                         <script>
                             alert("This Notice Added Already For Student !");
-                            window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                            window.open("notice_panel.php","_self");
                         </script>
                     <?php
                 } else {
@@ -304,14 +314,14 @@
                         ?>
                             <script>
                                 alert("Notice Added Successfully For Student !");
-                                window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                                window.open("notice_panel.php","_self");
                             </script>
                         <?php
                     }else{
                         ?>
                             <script>
                                 alert("Something Went Wrong !");
-                                window.open("http://localhost/sms-main/Admin/notice_panel.php","_self");
+                                window.open("notice_panel.php","_self");
                             </script>
                         <?php
                     }

@@ -1,6 +1,16 @@
+<?php
+session_start();
+if(!isset($_SESSION['email']) || !isset($_SESSION['isStudentLogin'])) {
+    header("Location: student_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Update Password</title> </head>
+    <head> 
+        <title>Update Password</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -146,7 +156,7 @@
                                 style="margin-inline-start: 7px;padding: 7px; width: 250px;
                                         border-radius: 12px; outline-color: transparent;
                                         border-color: transparent; margin-bottom: 3px" 
-                                placeholder="Enter Email ID" >
+                                value="<?php echo htmlspecialchars($_SESSION['email']); ?>" readonly>
                         </div>
             
                         <div style="margin-top: 7px;">
@@ -181,19 +191,20 @@
             
                     </form>
                 </fieldset>
-
+ 
             </div>
-
+ 
         </div>
         <?php
         include "Student_init.php" ;
         if(isset($_POST['changePassword'])){
-        $EMAIL=$_POST[$STUDENT_EMAIL];
+        $EMAIL=$_SESSION['email'];
         $PASSWD=$_POST[$STUDENT_PASSWORD];
         $CPASSWD=$_POST['studcpassword'];
-
+ 
             if($PASSWD==$CPASSWD){
-                $sql="UPDATE $STUDENT_ADD SET $STUDENT_PASSWORD='$PASSWD' WHERE $STUDENT_EMAIL='$EMAIL'";
+                $hashed_password = password_hash($PASSWD, PASSWORD_DEFAULT);
+                $sql="UPDATE $STUDENT_ADD SET $STUDENT_PASSWORD='$hashed_password' WHERE $STUDENT_EMAIL='$EMAIL'";
                 $dbQuery=mysqli_query($con,$sql);
                 if(!$dbQuery){
                 ?>
@@ -205,7 +216,7 @@
                 ?>
                 <script type="text/javascript">
                 alert("Password Update Successfully")
-                    window.open("http://localhost/sms-main/Student/student_login.php","_self")
+                    window.open("student_login.php","_self")
                 </script>
                 <?php
                 }

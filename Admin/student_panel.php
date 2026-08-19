@@ -1,6 +1,16 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html>
-    <head> <title>Student Panel</title> </head>
+    <head> 
+        <title>Student Panel</title> 
+        <link rel="stylesheet" href="../style.css">
+    </head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -230,24 +240,27 @@
                     ?>
                         <script>
                             alert("This Student Added Already !");
-                            window.open("http://localhost/sms-main/Admin/student_panel.php","_self");
+                            window.open("student_panel.php","_self");
                         </script>
                     <?php
                 } else {
-                    $insertInTable = "INSERT INTO $STUDENT_ADD VALUES($MNO,'$NAME','$EMAIL','$PASSWORD',$RESULT)";
+                    $hashed_password = password_hash($PASSWORD, PASSWORD_DEFAULT);
+                    $insertInTable = "INSERT INTO $STUDENT_ADD VALUES($MNO,'$NAME','$EMAIL','$hashed_password',$RESULT)";
                     $queryExe = mysqli_query($con,$insertInTable);
                     if($queryExe){
+                        // Also initialize default empty profile for this student
+                        mysqli_query($con, "INSERT INTO `student_profiles` (`student_email`, `student_id`, `department`, `year`, `phone`, `profile_photo`) VALUES ('$EMAIL', '', '', '', '', NULL)");
                         ?>
                             <script>
                                 alert("Student Added Successfully !");
-                                window.open("http://localhost/sms-main/Admin/student_panel.php","_self");
+                                window.open("student_panel.php","_self");
                             </script>
                         <?php
                     }else{
                         ?>
                             <script>
                                 alert("Something Went Wrong !");
-                                window.open("http://localhost/sms-main/Admin/student_panel.php","_self");
+                                window.open("student_panel.php","_self");
                             </script>
                         <?php
                     } 

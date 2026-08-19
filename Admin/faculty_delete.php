@@ -1,4 +1,10 @@
 <?php 
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['isAdminLogin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
 include 'Admin_init.php';
 $EMAIL=$_GET[$FACULTY_EMAIL];
 
@@ -7,7 +13,7 @@ if($deleteQuery){
     ?>
     <script type="text/javascript">
         alert("Faculty Removed !");
-        window.open("http://localhost/sms-main/Admin/admin_panel.php","_self")
+        window.open("admin_panel.php","_self")
         </script>
     <?php
 }else{
