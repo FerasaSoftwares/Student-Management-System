@@ -26,7 +26,7 @@ A **Student Management System** built with **PHP** and **MySQL**, supporting ful
 
 ```
 /student-management-system/
-├── main.php
+├── index.php
 ├── about_us.php
 ├── contact_us.php
 ├── admin/
@@ -64,7 +64,7 @@ A **Student Management System** built with **PHP** and **MySQL**, supporting ful
    ```
 
 4. **Run the Application**
-   - Access `main.php` via your local server (e.g., XAMPP, WAMP)
+   - Access `index.php` via your local server (e.g., XAMPP, WAMP)
 
 ## 📌 Future Improvements
 
