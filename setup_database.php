@@ -1,25 +1,27 @@
 <?php
-$HOST = 'localhost';
-$USER = 'root';
-$PASSWORD = '';
-$DATABASE = 'sms';
+require __DIR__ . '/db_config.php';
+$DATABASE = $DATABASE_NAME;
 
-// 1. Initial connection without database to create it
+// 1. Connect to the server
 $con = mysqli_connect($HOST, $USER, $PASSWORD);
 if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Create database
-$sql = "CREATE DATABASE IF NOT EXISTS `$DATABASE`";
-if (mysqli_query($con, $sql)) {
-    echo "Database created or already exists.<br>";
-} else {
-    die("Error creating database: " . mysqli_error($con));
+// Create database (only possible locally; on InfinityFree create it in the control panel)
+if ($IS_LOCAL) {
+    $sql = "CREATE DATABASE IF NOT EXISTS `$DATABASE`";
+    if (mysqli_query($con, $sql)) {
+        echo "Database created or already exists.<br>";
+    } else {
+        die("Error creating database: " . mysqli_error($con));
+    }
 }
 
 // 2. Connect to the database
-mysqli_select_db($con, $DATABASE);
+if (!mysqli_select_db($con, $DATABASE)) {
+    die("Cannot open database '$DATABASE': " . mysqli_error($con));
+}
 
 // Table definitions
 $queries = [];

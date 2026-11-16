@@ -46,6 +46,8 @@ $STUDENT_NOTICE_NAME='student_notice_name';
 $STUDENT_NOTICE_DES='student_notice_des';
 
 
+require __DIR__ . '/../db_config.php'; // overrides the local DB settings above
+
 $con=mysqli_connect($HOST,$USER,$PASSWORD,$DATABASE_NAME);
 if(!$con){
     mysqli_connect_error();

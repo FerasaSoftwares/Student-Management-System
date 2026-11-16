@@ -57,6 +57,8 @@ $PASSWORD='';
 $FACULTY_EMAIL='faculty_email';
 $FACULTY_PASSWORD='faculty_password';
 
+require __DIR__ . '/../db_config.php'; // overrides the local DB settings above
+
 $con=mysqli_connect($HOST,$USER,$PASSWORD,$DATABASE_NAME);
 if(!$con){
     mysqli_connect_error();

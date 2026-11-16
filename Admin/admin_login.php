@@ -1,3 +1,8 @@
+<?php
+// Must run before any HTML is sent, otherwise the session cookie is never set
+// (works on XAMPP only because of output buffering; fails on InfinityFree).
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en-US" style="text-align: center;">
 <meta charset="UTF-8">
@@ -208,7 +213,6 @@
     </body>
 
     <?php
-    session_start();
     include "Admin_init.php";
 
     if (isset($_POST['btnLogin'])) {

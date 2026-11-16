@@ -46,6 +46,8 @@ $STUDENT_EMAIL='student_email';
 $STUDENT_PASSWORD='student_password';
 
 
+require __DIR__ . '/../db_config.php'; // overrides the local DB settings above
+
 $con=mysqli_connect($HOST,$USER,$PASSWORD,$DATABASE_NAME);
 if(!$con){
     mysqli_connect_error();
